@@ -115,10 +115,18 @@ namespace listingapi.Controllers
 
             try
             {
-                // include Prices here
+
                 var result = _listingsContext.Listings
                     .FirstOrDefault(l => l.Id == id);
                 if (result == null) return NotFound();
+
+                // include Prices here
+                var price = new listingapi.Infrastructure.Database.Models.Prices();
+                price.PriceEur = result.Price;
+                price.CreatedDate = DateTimeOffset.Now;
+                price.ListingId = id;
+
+                _listingsContext.Prices.Add(price);
 
                 // Update listing
                 var priceDate = DateTime.Now;
@@ -136,6 +144,7 @@ namespace listingapi.Controllers
                 result.PostalCode = listing.PostalAddress.PostalCode;
                 result.StreetAddress = listing.PostalAddress.StreetAddress;
                 _listingsContext.Listings.Update(result);
+
                 await _listingsContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return Ok(MapListing(result));
             }
@@ -157,18 +166,19 @@ namespace listingapi.Controllers
         [Route("{id}/prices")]
         public IActionResult GetListingPriceHistory(int id)
         {
-            // ToDo : implement me !
-            return Ok(new List<PriceReadOnly>
+            try
             {
-                new PriceReadOnly
-                {
-                    PriceEur = 130000
-                },
-                new PriceReadOnly
-                {
-                    PriceEur = 250000
-                }
-            });
+                // include Prices here
+                var result = _listingsContext.Prices
+                    .Where(l => l.ListingId == id).OrderByDescending(l=>l.CreatedDate);
+                if (result == null) return NotFound();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"GetListingPriceHistory. Listing : {id}. Exception : {ex}");
+                return StatusCode(500);
+            }
         }
 
         private static ListingReadOnly MapListing(Infrastructure.Database.Models.Listing listing)
