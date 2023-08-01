@@ -1,0 +1,40 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: listingapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: listingapi
+  template:
+    metadata:
+      labels:
+        app: listingapi
+    spec:
+      containers:
+        - name: listingapi 
+          image: listingapi:latest
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 80
+          env:
+           - name: PGHOST
+             value: "postgres.endpoint"
+           - name: PGDATABASE
+             value: "listing"
+           - name: PGUSER
+             value: "listing"
+           - name: PGPASSWORD
+             value: "listing"
+          resources:
+            requests:
+              memory: "82Mi"
+              cpu: "1m"
+            limits:
+              memory: "130Mi"
+              cpu: "100m"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway

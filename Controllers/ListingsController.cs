@@ -120,13 +120,16 @@ namespace listingapi.Controllers
                     .FirstOrDefault(l => l.Id == id);
                 if (result == null) return NotFound();
 
-                // include Prices here
-                var price = new listingapi.Infrastructure.Database.Models.Prices();
-                price.PriceEur = result.Price;
-                price.CreatedDate = DateTimeOffset.Now;
-                price.ListingId = id;
+                if (result.Price != listing.LatestPriceEur)
+                {
+                    // include Prices here
+                    var price = new listingapi.Infrastructure.Database.Models.Prices();
+                    price.PriceEur = result.Price;
+                    price.CreatedDate = DateTime.Now;
+                    price.ListingId = id;
 
-                _listingsContext.Prices.Add(price);
+                    _listingsContext.Prices.Add(price);
+                }
 
                 // Update listing
                 var priceDate = DateTime.Now;
@@ -170,7 +173,7 @@ namespace listingapi.Controllers
             {
                 // include Prices here
                 var result = _listingsContext.Prices
-                    .Where(l => l.ListingId == id).OrderByDescending(l=>l.CreatedDate);
+                    .Where(l => l.ListingId == id).OrderByDescending(l => l.CreatedDate);
                 if (result == null) return NotFound();
                 return Ok(result);
             }
