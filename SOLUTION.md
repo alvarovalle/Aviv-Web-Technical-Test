@@ -13,6 +13,8 @@ In addition I ve included a created_date at api to inform when the price changes
 I ve also saw that when there is only one record in Listings there are no price history yet.
 But when we change the price so there is a new record to be inserted in Prices 
 
+I took about 120 minutes to do everthing 
+
 ## Questions
 
 This section contains additional questions your expected to answer before the debrief interview.
